@@ -6,30 +6,66 @@
 
 typedef uint8_t BYTE;
 
-// 이미지 반전
-void InverseImage(BYTE* Img, BYTE* Out, int W, int H) {
+
+//이미지 반전
+void InverseImage(BYTE* Img, BYTE *Out, int W, int H)
+{
     int ImgSize = W * H;
-    for (int i = 0; i < ImgSize; i++) {
+    for (int i = 0; i < ImgSize; i++)
+    {
         Out[i] = 255 - Img[i];
     }
 }
 
-// 밝기 조정
-void BrightnessAdj(BYTE* Img, BYTE* Out, int W, int H, int Val) {
+//밝기 조정
+void BrightnessAdj(BYTE* Img, BYTE* Out, int W, int H, int Val)
+{
     int ImgSize = W * H;
-    for (int i = 0; i < ImgSize; i++) {
-        int newVal = Img[i] + Val;
-        Out[i] = (newVal > 255) ? 255 : (newVal < 0) ? 0 : newVal;
+    for (int i = 0; i < ImgSize; i++)
+    {
+        if (Img[i] + Val > 255)
+        {
+            Out[i] = 255;
+        }
+        else if (Img[i] + Val < 0)
+        {
+            Out[i] = 0;
+        }
+        else 	Out[i] =Img[i] + Val;
     }
 }
 
-// 대비 조정
-void ContrastAdj(BYTE* Img, BYTE* Out, int W, int H, double Val) {
+//대비 조정
+void ContrastAdj(BYTE* Img, BYTE* Out, int W, int H, double Val)
+{
     int ImgSize = W * H;
-    for (int i = 0; i < ImgSize; i++) {
-        int newVal = (int)(Img[i] * Val);
-        Out[i] = (newVal > 255) ? 255 : newVal;
+    for (int i = 0; i < ImgSize; i++)
+    {
+        if (Img[i] * Val > 255.0)
+        {
+            Out[i] = 255;
+        }
+        else 	Out[i] = (BYTE)(Img[i] * Val);
     }
+}
+
+// SaveBMPFile
+void SaveBMPFile(BITMAPFILEHEADER hf, BITMAPINFOHEADER hInfo,
+                 RGBQUAD* hRGB, BYTE* Output, int W, int H, const char* FileName)
+{
+    FILE * fp = fopen(FileName, "wb");
+    if(hInfo.biBitCount==24){
+        fwrite(&hf, sizeof(BYTE), sizeof(BITMAPFILEHEADER), fp);
+        fwrite(&hInfo, sizeof(BYTE), sizeof(BITMAPINFOHEADER), fp);
+        fwrite(Output, sizeof(BYTE), W*H*3, fp);
+    }
+    else{
+        fwrite(&hf, sizeof(BYTE), sizeof(BITMAPFILEHEADER), fp);
+        fwrite(&hInfo, sizeof(BYTE), sizeof(BITMAPINFOHEADER), fp);
+        fwrite(hRGB, sizeof(RGBQUAD), 256, fp);
+        fwrite(Output, sizeof(BYTE), W*H, fp);
+    }
+    fclose(fp);
 }
 
 int main()
@@ -68,8 +104,18 @@ int main()
     fclose(fp);
 
 
-    SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output.bmp");
 
+    // Inverse Image
+    InverseImage(Image, Output, W, H);
+    SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "InverseImage.bmp");
+
+    // Brightness Adjustment
+    BrightnessAdj(Image, Output, W, H, 50);
+    SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "BrightnessAdj.bmp");
+
+    // Contrast Adjustment
+    ContrastAdj(Image, Output, W, H, 1.5);
+    SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "ContrastAdj.bmp");
 
     free(Image);
     free(Output);
