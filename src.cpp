@@ -6,30 +6,23 @@
 
 typedef uint8_t BYTE;
 
-// 이미지 반전
-void InverseImage(BYTE* Img, BYTE* Out, int W, int H) {
-    int ImgSize = W * H;
-    for (int i = 0; i < ImgSize; i++) {
-        Out[i] = 255 - Img[i];
+// SaveBMPFile
+void SaveBMPFile(BITMAPFILEHEADER hf, BITMAPINFOHEADER hInfo,
+                 RGBQUAD* hRGB, BYTE* Output, int W, int H, const char* FileName)
+{
+    FILE * fp = fopen(FileName, "wb");
+    if(hInfo.biBitCount==24){
+        fwrite(&hf, sizeof(BYTE), sizeof(BITMAPFILEHEADER), fp);
+        fwrite(&hInfo, sizeof(BYTE), sizeof(BITMAPINFOHEADER), fp);
+        fwrite(Output, sizeof(BYTE), W*H*3, fp);
     }
-}
-
-// 밝기 조정
-void BrightnessAdj(BYTE* Img, BYTE* Out, int W, int H, int Val) {
-    int ImgSize = W * H;
-    for (int i = 0; i < ImgSize; i++) {
-        int newVal = Img[i] + Val;
-        Out[i] = (newVal > 255) ? 255 : (newVal < 0) ? 0 : newVal;
+    else{
+        fwrite(&hf, sizeof(BYTE), sizeof(BITMAPFILEHEADER), fp);
+        fwrite(&hInfo, sizeof(BYTE), sizeof(BITMAPINFOHEADER), fp);
+        fwrite(hRGB, sizeof(RGBQUAD), 256, fp);
+        fwrite(Output, sizeof(BYTE), W*H, fp);
     }
-}
-
-// 대비 조정
-void ContrastAdj(BYTE* Img, BYTE* Out, int W, int H, double Val) {
-    int ImgSize = W * H;
-    for (int i = 0; i < ImgSize; i++) {
-        int newVal = (int)(Img[i] * Val);
-        Out[i] = (newVal > 255) ? 255 : newVal;
-    }
+    fclose(fp);
 }
 
 int main()
