@@ -182,6 +182,14 @@ void Laplace_Conv_DC(BYTE* Img, BYTE* Out, int W, int H) {
     }
 }
 
+void Binarization(BYTE * Img, BYTE * Out, int W, int H, BYTE Threshold)
+{
+    int ImgSize = W * H;
+    for (int i = 0; i < ImgSize; i++) {
+        if (Img[i] < Threshold) Out[i] = 0;
+        else Out[i] = 255;
+    }
+}
 
 
 // SaveBMPFile
@@ -217,30 +225,26 @@ int main()
     fread(&hf, sizeof(BITMAPFILEHEADER), 1, fp);
     fread(&hInfo, sizeof(BITMAPINFOHEADER), 1, fp);
     fread(hRGB, sizeof(RGBQUAD), 256, fp);
-    int ImgSize = hInfo.biWidth * hInfo.biHeight;
-    int H = hInfo.biHeight;
-    int W = hInfo.biWidth;
-    BYTE* Image;
-    BYTE* Output;
-    BYTE * Temp = (BYTE*)malloc(ImgSize);
-    // True color
-    if (hInfo.biBitCount == 24) {
-        Image = (BYTE*)malloc(ImgSize * 3);
-        Output = (BYTE*)malloc(ImgSize * 3);
-        fread(Image, sizeof(BYTE), ImgSize * 3, fp);
-    }
-    // Grayscale
-    else {
-        fread(hRGB, sizeof(RGBQUAD), 256, fp);
-        Image = (BYTE*)malloc(ImgSize);
-        Output = (BYTE*)malloc(ImgSize);
-        fread(Image, sizeof(BYTE), ImgSize, fp);
-    }
+    int H = hInfo.biHeight, W = hInfo.biWidth;
+    int ImgSize = W*H;
+    BYTE * Image = (BYTE *)malloc(ImgSize);
+    BYTE * Temp = (BYTE*)malloc(ImgSize); // 임시배열
+    BYTE* Output = (BYTE*)malloc(ImgSize);
+    fread(Image, sizeof(BYTE), ImgSize, fp);
     fclose(fp);
 
+    // Convolution Operations
+    AverageConv(Image, Output, hInfo.biWidth, hInfo.biHeight);
+    GaussAvrConv(Image, Output, W, H);
+    Prewitt_X_Conv(Image, Output, W, H);
+    Prewitt_Y_Conv(Image, Output, W, H);
+    Sobel_X_Conv(Image, Output, W, H);
+    Sobel_Y_Conv(Image, Output, hInfo.biWidth, hInfo.biHeight);
+    Laplace_Conv(Image, Output, W, H);
 
-    SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output.bmp");
 
+    Laplace_Conv_DC(Image, Output, W, H);
+    SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "output.bmp");
 
     free(Image);
     free(Output);
