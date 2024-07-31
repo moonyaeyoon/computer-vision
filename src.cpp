@@ -68,8 +68,8 @@ void Binarization(BYTE * Img, BYTE * Out, int W, int H, BYTE Threshold)
 {
 	int ImgSize = W * H;
 	for (int i = 0; i < ImgSize; i++) {
-		if (Img[i] < Threshold) Out[i] = 0;
-		else Out[i] = 255;
+		if (Img[i] < Threshold) Out[i] = 255;  // 배경을 하얗게
+		else Out[i] = 0;  // 전경을 검게
 	}
 }
 
@@ -123,6 +123,7 @@ int GozalezBinThresh(int* Histo){
     }
     return T;
 }
+
 
 // SaveBMPFile
 void SaveBMPFile(BITMAPFILEHEADER hf, BITMAPINFOHEADER hInfo,
@@ -200,10 +201,6 @@ int main()
 	int Thres = GozalezBinThresh(Histo);
 	Binarization(Image, Output, W, H, Thres);
 	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "GonzalezBinarization.bmp");
-
-
-    SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output.bmp");
-
 
     free(Image);
     free(Output);
