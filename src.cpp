@@ -6,6 +6,32 @@
 
 typedef uint8_t BYTE;
 
+// 이미지 반전
+void InverseImage(BYTE* Img, BYTE* Out, int W, int H) {
+    int ImgSize = W * H;
+    for (int i = 0; i < ImgSize; i++) {
+        Out[i] = 255 - Img[i];
+    }
+}
+
+// 밝기 조정
+void BrightnessAdj(BYTE* Img, BYTE* Out, int W, int H, int Val) {
+    int ImgSize = W * H;
+    for (int i = 0; i < ImgSize; i++) {
+        int newVal = Img[i] + Val;
+        Out[i] = (newVal > 255) ? 255 : (newVal < 0) ? 0 : newVal;
+    }
+}
+
+// 대비 조정
+void ContrastAdj(BYTE* Img, BYTE* Out, int W, int H, double Val) {
+    int ImgSize = W * H;
+    for (int i = 0; i < ImgSize; i++) {
+        int newVal = (int)(Img[i] * Val);
+        Out[i] = (newVal > 255) ? 255 : newVal;
+    }
+}
+
 int main()
 {
     BITMAPFILEHEADER hf; // 14바이트
@@ -23,11 +49,24 @@ int main()
     int ImgSize = hInfo.biWidth * hInfo.biHeight;
     int H = hInfo.biHeight;
     int W = hInfo.biWidth;
-    BYTE * Image = (BYTE *)malloc(ImgSize);
+    BYTE* Image;
+    BYTE* Output;
     BYTE * Temp = (BYTE*)malloc(ImgSize);
-    BYTE* Output = (BYTE*)malloc(ImgSize);
-    fread(Image, sizeof(BYTE), ImgSize, fp);
+    // True color
+    if (hInfo.biBitCount == 24) {
+        Image = (BYTE*)malloc(ImgSize * 3);
+        Output = (BYTE*)malloc(ImgSize * 3);
+        fread(Image, sizeof(BYTE), ImgSize * 3, fp);
+    }
+    // Grayscale
+    else {
+        fread(hRGB, sizeof(RGBQUAD), 256, fp);
+        Image = (BYTE*)malloc(ImgSize);
+        Output = (BYTE*)malloc(ImgSize);
+        fread(Image, sizeof(BYTE), ImgSize, fp);
+    }
     fclose(fp);
+
 
     SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output.bmp");
 
