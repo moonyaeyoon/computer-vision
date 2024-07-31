@@ -161,46 +161,29 @@ int main()
     int ImgSize = hInfo.biWidth * hInfo.biHeight;
     int H = hInfo.biHeight;
     int W = hInfo.biWidth;
-    BYTE* Image;
-    BYTE* Output;
-    BYTE * Temp = (BYTE*)malloc(ImgSize);
-    // True color
-    if (hInfo.biBitCount == 24) {
-        Image = (BYTE*)malloc(ImgSize * 3);
-        Output = (BYTE*)malloc(ImgSize * 3);
-        fread(Image, sizeof(BYTE), ImgSize * 3, fp);
-    }
-    // Grayscale
-    else {
-        fread(hRGB, sizeof(RGBQUAD), 256, fp);
-        Image = (BYTE*)malloc(ImgSize);
-        Output = (BYTE*)malloc(ImgSize);
-        fread(Image, sizeof(BYTE), ImgSize, fp);
-    }
+	BYTE * Image = (BYTE *)malloc(ImgSize);
+	BYTE * Temp = (BYTE*)malloc(ImgSize);
+	BYTE* Output = (BYTE*)malloc(ImgSize);
+	fread(Image, sizeof(BYTE), ImgSize, fp);
+	fclose(fp);
     fclose(fp);
 
 	// Histogram Calculation
-	int Histo[256] = {0};
-	int AHisto[256] = {0};
+	int Histo[256] = { 0 };
+	int AHisto[256] = { 0 };
+
 	ObtainHistogram(Image, Histo, W, H);
 	ObtainAHistogram(Histo, AHisto);
 
-	// Histogram Stretching
-	HistogramStretching(Image, Output, Histo, W, H);
-	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "HistogramStretching.bmp");
 
-	// Histogram Equalization
-	HistogramEqualization(Image, Output, AHisto, W, H);
-	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "HistogramEqualization.bmp");
-
-	// Binarization with a threshold value
+	HistogramEqualization(Image, Output, AHisto, W,H);
+	HistogramStretching(Image, Output, Histo, W,H);
 	Binarization(Image, Output, W, H, 128);
-	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "Binarization.bmp");
-
-	// Gonzalez Binary Threshold
 	int Thres = GozalezBinThresh(Histo);
 	Binarization(Image, Output, W, H, Thres);
-	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "GonzalezBinarization.bmp");
+
+
+	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "output.bmp");
 
     free(Image);
     free(Output);
