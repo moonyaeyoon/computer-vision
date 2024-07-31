@@ -31,7 +31,7 @@ int main()
     BITMAPINFOHEADER hInfo; // 40바이트
     RGBQUAD hRGB[256]; // 1024바이트
     FILE* fp;
-    fp = fopen("LENNA.bmp", "rb");
+    fp = fopen("coin.bmp", "rb");
     if (fp == NULL) {
         printf("File not found!\n");
         return -1;
@@ -42,27 +42,14 @@ int main()
     int ImgSize = hInfo.biWidth * hInfo.biHeight;
     int H = hInfo.biHeight;
     int W = hInfo.biWidth;
-    BYTE* Image;
-    BYTE* Output;
+    BYTE * Image = (BYTE *)malloc(ImgSize);
     BYTE * Temp = (BYTE*)malloc(ImgSize);
-    // True color
-    if (hInfo.biBitCount == 24) {
-        Image = (BYTE*)malloc(ImgSize * 3);
-        Output = (BYTE*)malloc(ImgSize * 3);
-        fread(Image, sizeof(BYTE), ImgSize * 3, fp);
-    }
-    // Grayscale
-    else {
-        fread(hRGB, sizeof(RGBQUAD), 256, fp);
-        Image = (BYTE*)malloc(ImgSize);
-        Output = (BYTE*)malloc(ImgSize);
-        fread(Image, sizeof(BYTE), ImgSize, fp);
-    }
+    BYTE* Output = (BYTE*)malloc(ImgSize);
+    fread(Image, sizeof(BYTE), ImgSize, fp);
+    fclose(fp);
     fclose(fp);
 
-
-    SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output.bmp");
-
+    SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "output.bmp");
 
     free(Image);
     free(Output);
