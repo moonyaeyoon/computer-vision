@@ -1,7 +1,10 @@
-//
-// Created by 문예윤 on 2024/07/31.
-//
+#pragma warning(disable:4996)
+#include <stdio.h>
+#include <stdlib.h>
+#include "bitmap.h"
+#include <math.h>
 
+typedef uint8_t BYTE;
 
 int main()
 {
@@ -18,8 +21,10 @@ int main()
     fread(&hInfo, sizeof(BITMAPINFOHEADER), 1, fp);
     fread(hRGB, sizeof(RGBQUAD), 256, fp);
     int ImgSize = hInfo.biWidth * hInfo.biHeight;
+    int H = hInfo.biHeight;
+    int W = hInfo.biWidth;
     BYTE * Image = (BYTE *)malloc(ImgSize);
-    BYTE * Temp = (BYTE*)malloc(ImgSize); // �ӽù迭
+    BYTE * Temp = (BYTE*)malloc(ImgSize);
     BYTE* Output = (BYTE*)malloc(ImgSize);
     fread(Image, sizeof(BYTE), ImgSize, fp);
     fclose(fp);
