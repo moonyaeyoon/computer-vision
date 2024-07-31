@@ -149,7 +149,7 @@ int main()
     BITMAPINFOHEADER hInfo; // 40바이트
     RGBQUAD hRGB[256]; // 1024바이트
     FILE* fp;
-    fp = fopen("LENNA.bmp", "rb");
+    fp = fopen("coin.bmp", "rb");
     if (fp == NULL) {
         printf("File not found!\n");
         return -1;
@@ -177,6 +177,29 @@ int main()
         fread(Image, sizeof(BYTE), ImgSize, fp);
     }
     fclose(fp);
+
+	// Histogram Calculation
+	int Histo[256] = {0};
+	int AHisto[256] = {0};
+	ObtainHistogram(Image, Histo, W, H);
+	ObtainAHistogram(Histo, AHisto);
+
+	// Histogram Stretching
+	HistogramStretching(Image, Output, Histo, W, H);
+	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "HistogramStretching.bmp");
+
+	// Histogram Equalization
+	HistogramEqualization(Image, Output, AHisto, W, H);
+	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "HistogramEqualization.bmp");
+
+	// Binarization with a threshold value
+	Binarization(Image, Output, W, H, 128);
+	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "Binarization.bmp");
+
+	// Gonzalez Binary Threshold
+	int Thres = GozalezBinThresh(Histo);
+	Binarization(Image, Output, W, H, Thres);
+	SaveBMPFile(hf, hInfo, hRGB, Output, W, H, "GonzalezBinarization.bmp");
 
 
     SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output.bmp");
